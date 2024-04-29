@@ -1,9 +1,5 @@
-import Image from "next/image";
+import { Fragment } from "react";
 
 export default function Home() {
-  return (
-    <>
-      <h1>hi</h1>
-    </>
-  );
+  return <Fragment></Fragment>;
 }
