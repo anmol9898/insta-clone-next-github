@@ -1,5 +1,9 @@
-import { Fragment } from "react";
+import Feed from "@/components/Feed/Feed";
 
 export default function Home() {
-  return "Home";
+  return (
+    <>
+      <Feed />
+    </>
+  );
 }
