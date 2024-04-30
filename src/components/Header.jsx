@@ -29,8 +29,8 @@ const Header = () => {
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [imageFileUploading, setImageFileUploading] = useState(false);
   const [postUploading, setPostUploading] = useState(false);
+  const [caption, setCaption] = useState("");
   const filePickerRef = useRef(null);
-  const captionRef = useRef(null);
   const db = getFirestore(app);
 
   useEffect(() => {
@@ -44,7 +44,7 @@ const Header = () => {
     setPostUploading(true);
     const docRef = await addDoc(collection(db, "posts"), {
       username: session.user.username,
-      caption: captionRef.current.value,
+      caption,
       profileImg: session.user.image,
       image: imageFileUrl,
       timestamp: serverTimestamp(),
@@ -214,17 +214,17 @@ const Header = () => {
             </>
             <input
               type="text"
-              ref={captionRef}
               placeholder="Please enter your caption"
               maxLength="150"
               className="w-full text-center active:outline-none focus:outline-none pl-2"
+              onChange={(e) => setCaption(e.target.value)}
             />
             <button
               disabled={
                 !selectedFile ||
                 postUploading ||
                 imageFileUploading ||
-                captionRef.current.value.trim() === ""
+                caption.trim() === ""
               }
               onClick={submitHandler}
               className="bg-red-600 w-full p-2 rounded-md text-white text-lg shadow-md hover:brightness-105 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:brightness-100"
