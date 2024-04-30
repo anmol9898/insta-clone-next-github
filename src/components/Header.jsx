@@ -5,14 +5,73 @@ import logoShort from "./../../public/instgram-short.webp";
 import Link from "next/link";
 import { signIn, useSession, signOut } from "next-auth/react";
 import Modal from "react-modal";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HiCamera } from "react-icons/hi";
 import { IoCloseOutline } from "react-icons/io5";
+import { app } from "@/firebase";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 
 const Header = () => {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [imageFileUrl, setImageFileUrl] = useState(null);
+  const [imageFileUploading, setImageFileUploading] = useState(false);
+  const filePickerRef = useRef(null);
 
+  useEffect(() => {
+    if (selectedFile) {
+      uploadImageToStorage();
+    }
+  }, [selectedFile]);
+
+  async function uploadImageToStorage() {
+    setImageFileUploading(true);
+    const storage = getStorage(app);
+    const filename = new Date().getTime() + "-" + selectedFile.name;
+    const storageRef = ref(storage, filename);
+    const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log("upload is " + progress + "% done");
+      },
+      (error) => {
+        console.log(error);
+        setImageFileUploading(false);
+        setImageFileUrl(null);
+        setSelectedFile(null);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setImageFileUrl(downloadURL);
+          setImageFileUploading(false);
+        });
+      }
+    );
+  }
+
+  const addImageToPost = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setImageFileUrl(URL.createObjectURL(file));
+    }
+  };
+  function clickFilePickerDelay() {
+    setTimeout(() => {
+      filePickerRef.current.click();
+    }, 1);
+    // addign delay bcz misbehaving if remove and then choosing the image
+  }
   return (
     <div className="p-3 shadow-sm border-b sticky top-0 bg-white z-30">
       <div className="flex justify-between items-center max-w-6xl mx-auto">
@@ -92,14 +151,55 @@ const Header = () => {
             />
           </div>
           <div className="flex flex-col justify-center items-center gap-4">
-            <HiCamera className="text-5xl text-gray-400 opacity-90 cursor-pointer" />
+            <>
+              {selectedFile ? (
+                <div className="">
+                  <Image
+                    src={imageFileUrl}
+                    alt="selected file"
+                    // fill={true}
+                    width={450}
+                    height={250}
+                    className={`${
+                      imageFileUploading && "animate-pulse"
+                    } w-full max-h-[250px] object-cover`}
+                  />
+                  <p
+                    className="underline cursor-pointer"
+                    onClick={() => {
+                      setSelectedFile(null);
+                      clickFilePickerDelay();
+                    }}
+                  >
+                    Choose another
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <HiCamera
+                    onClick={() => filePickerRef.current.click()}
+                    className="text-5xl text-gray-400 opacity-90 cursor-pointer"
+                  />
+                  <input
+                    hidden
+                    ref={filePickerRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={addImageToPost}
+                  />
+                </>
+              )}
+            </>
             <input
               type="text"
               placeholder="Please enter your caption"
               maxLength="150"
               className="w-full text-center active:outline-none focus:outline-none pl-2"
             />
-            <button disabled className="bg-red-600 w-full p-2 rounded-md text-white text-lg shadow-md hover:brightness-105 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:brightness-100">
+            <button
+              disabled
+              className="bg-red-600 w-full p-2 rounded-md text-white text-lg shadow-md hover:brightness-105 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:brightness-100"
+            >
               Upload Post
             </button>
           </div>
