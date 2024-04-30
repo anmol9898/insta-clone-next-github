@@ -51,6 +51,7 @@ const Header = () => {
     });
     setPostUploading(false);
     setIsOpen(false);
+    location.reload();
   }
   async function uploadImageToStorage() {
     setImageFileUploading(true);
