@@ -15,6 +15,12 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
+import {
+  addDoc,
+  collection,
+  getFirestore,
+  serverTimestamp,
+} from "firebase/firestore";
 
 const Header = () => {
   const { data: session } = useSession();
@@ -22,7 +28,10 @@ const Header = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [imageFileUploading, setImageFileUploading] = useState(false);
+  const [postUploading, setPostUploading] = useState(false);
   const filePickerRef = useRef(null);
+  const captionRef = useRef(null);
+  const db = getFirestore(app);
 
   useEffect(() => {
     if (selectedFile) {
@@ -30,6 +39,19 @@ const Header = () => {
     }
   }, [selectedFile]);
 
+  //   submit post
+  async function submitHandler() {
+    setPostUploading(true);
+    const docRef = await addDoc(collection(db, "posts"), {
+      username: session.user.username,
+      caption: captionRef.current.value,
+      profileImg: session.user.image,
+      image: imageFileUrl,
+      timestamp: serverTimestamp(),
+    });
+    setPostUploading(false);
+    setIsOpen(false);
+  }
   async function uploadImageToStorage() {
     setImageFileUploading(true);
     const storage = getStorage(app);
@@ -192,12 +214,19 @@ const Header = () => {
             </>
             <input
               type="text"
+              ref={captionRef}
               placeholder="Please enter your caption"
               maxLength="150"
               className="w-full text-center active:outline-none focus:outline-none pl-2"
             />
             <button
-              disabled
+              disabled={
+                !selectedFile ||
+                postUploading ||
+                imageFileUploading ||
+                captionRef.current.value.trim() === ""
+              }
+              onClick={submitHandler}
               className="bg-red-600 w-full p-2 rounded-md text-white text-lg shadow-md hover:brightness-105 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:brightness-100"
             >
               Upload Post
