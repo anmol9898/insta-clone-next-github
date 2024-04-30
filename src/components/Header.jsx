@@ -113,7 +113,7 @@ const Header = () => {
         </div>
 
         {/*  input */}
-        <div className="max-w-60">
+        <div className="hidden md:max-w-60 md:inline-flex">
           <input
             type="text"
             placeholder="Search"
@@ -125,13 +125,12 @@ const Header = () => {
         <div className="">
           {session ? (
             <div className="flex items-center justify-end gap-10">
-              <Link
-                href="/"
-                onClick={() => signOut()}
-                className="text-red-600 text-xl font-semibold cursor-pointer "
+              <button
+                onClick={() => setIsOpen(true)}
+                className="bg-sky-500 text-white py-3 px-4 rounded-lg shadow-md text-md font-semibold hover:scale-105 transition-all"
               >
-                Log Out
-              </Link>
+                Create Post
+              </button>
               <Image
                 src={session.user.image}
                 className="rounded-full"
@@ -139,12 +138,13 @@ const Header = () => {
                 width={60}
                 height={60}
               />
-              <button
-                onClick={() => setIsOpen(true)}
-                className="bg-sky-500 text-white py-3 px-4 rounded-lg shadow-md text-md font-semibold hover:scale-105 transition-all"
+              <Link
+                href="/"
+                onClick={() => signOut()}
+                className="text-red-600 text-xl font-semibold cursor-pointer "
               >
-                Create Post
-              </button>
+                Log Out
+              </Link>
             </div>
           ) : (
             <Link
