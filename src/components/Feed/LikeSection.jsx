@@ -20,31 +20,39 @@ const LikeSection = ({ id }) => {
   const [likes, setLikes] = useState([]);
   const db = getFirestore(app);
 
-  //   how many likes for this post-id stored in db
+  // Fetch likes for this post-id from the database
   useEffect(() => {
-    onSnapshot(collection(db, "posts", id, "likes"), (snapshot) => {
+    const unsubscribe = onSnapshot(collection(db, "posts", id, "likes"), (snapshot) => {
       setLikes(snapshot.docs);
     });
+
+    // Cleanup function
+    return () => unsubscribe();
   }, [db, id]);
 
-  //   if this user has already liked or not
+  // Check if the current user has already liked the post
   useEffect(() => {
-    if (likes.findIndex((like) => like.id === session?.user?.uid) !== -1) {
+    if (session && likes.some(like => like.id === session.user?.uid)) {
       setHasLiked(true);
     } else {
       setHasLiked(false);
     }
-  }, [likes]);
+  }, [session, likes]);
 
+  // Like or unlike the post
   async function likePost() {
-    if (hasLiked) {
-      await deleteDoc(doc(db, "posts", id, "likes", session?.user?.uid));
-    } else {
-      await setDoc(doc(db, "posts", id, "likes", session?.user?.uid), {
-        username: session?.user?.username,
-      });
+    if (session) {
+      const likeRef = doc(db, "posts", id, "likes", session.user?.uid);
+      if (hasLiked) {
+        await deleteDoc(likeRef);
+      } else {
+        await setDoc(likeRef, {
+          username: session.user?.username,
+        });
+      }
     }
   }
+
   return (
     <>
       {session && (
