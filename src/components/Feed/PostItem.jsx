@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { SlOptionsVertical } from "react-icons/sl";
-import { FaRegHeart } from "react-icons/fa";
-import { FaHeart } from "react-icons/fa6";
+
+import LikeSection from "./LikeSection";
+import CommentsInputSection from "./CommentsInputSection";
 
 const PostItem = ({ post }) => {
   return (
@@ -33,9 +34,7 @@ const PostItem = ({ post }) => {
         </div>
 
         {/* likes */}
-        <div className="flex gap-2 p-3">
-          <FaRegHeart className="text-xl" />2 likes
-        </div>
+        <LikeSection id={post.id} />
 
         {/* caption */}
         <div className="flex gap-2 p-2 pt-0 items-center">
