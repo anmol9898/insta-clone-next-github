@@ -2,7 +2,7 @@ import Image from "next/image";
 import { SlOptionsVertical } from "react-icons/sl";
 
 import LikeSection from "./LikeSection";
-import CommentsInputSection from "./CommentsInputSection";
+import CommentsSection from "./CommentsSection";
 
 const PostItem = ({ post }) => {
   return (
@@ -43,25 +43,8 @@ const PostItem = ({ post }) => {
         </div>
 
         {/* comments */}
-
         {/* comments input */}
-        <div className="flex gap-2 p-3">
-          <Image
-            src="/instagram-short.webp"
-            height={20}
-            width={30}
-            alt="profile"
-            className="rounded-full object-contain ring"
-          />
-          <input
-            type="text"
-            placeholder="Enter your comment..."
-            className="flex-1"
-          />
-          <button disabled className="text-blue-600 opacity-40">
-            Send
-          </button>
-        </div>
+        <CommentsSection id={post.id} />
       </div>
     </div>
   );
